@@ -2,3 +2,12 @@
 projectoADS/\.idea/
 
 \.DS_Store
+
+\.idea/
+
+*.log
+
+projectoADS/data/derby/*
+
+projectoADS/target/*
+*.iml

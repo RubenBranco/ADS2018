@@ -6,7 +6,7 @@ public class ProductSpec {
 	private int    itemID;      // the product's code
 	private String description;
 	private double price;       // value per unit
-	private double qty;         // units in stock
+	private int qty;         // units in stock
 	
 	/**
 	 * Creates a new product given its code, description, face value, 
@@ -17,7 +17,7 @@ public class ProductSpec {
 	 * @param price       The value by which the product should be sold
 	 * @param qty         The number of units available in stock
 	 */
-	public ProductSpec(int id, int code, String description, double price, double qty) {
+	public ProductSpec(int id, int code, String description, double price, int qty) {
 		this.id          = id;
 		this.itemID      = code;
 		this.description = description;
@@ -55,7 +55,7 @@ public class ProductSpec {
 	/**
 	 * @return The product's quantity
 	 */
-	public double getStock() {
+	public int getStock() {
 		return qty;
 	}
 
@@ -63,11 +63,11 @@ public class ProductSpec {
 	 * Updates the product's stock quantity
 	 * @param qty The new stock quantity
 	 */
-	public void setStock(double qty) {
+	public void setStock(int qty) {
 		this.qty = qty;
 	}
 	
 	public String toString() {
-		return description + " [code " + itemID + " with unit price €" + price + " and stock " + qty + "]"; 
+		return description + " [code " + itemID + " with unit price â‚¬" + price + " and stock " + qty + "]";
 	}
 }

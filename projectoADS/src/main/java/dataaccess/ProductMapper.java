@@ -18,9 +18,9 @@ public class ProductMapper {
 		    "SELECT id, itemID, description, price, qty FROM product WHERE id = ?";
 		
 	/**
-	 * Gets a product given its codProd 
+	 * Gets a product given its id
 	 * 
-	 * @param item_id The code of the product to search for
+	 * @param id The code of the product to search for
 	 * @return The in-memory representation of the product
 	 * @throws PersistenceException 
 	 */
@@ -77,7 +77,7 @@ public class ProductMapper {
 					                              rs.getInt("itemID"),
 					                              rs.getString("description"),
 					                              rs.getDouble("price"),
-					                              rs.getDouble("qty"));
+					                              rs.getInt("qty"));
 			return product;
 		} catch (SQLException e) {
 			throw new RecordNotFoundException ("Product not found! ", e);
@@ -93,10 +93,10 @@ public class ProductMapper {
 	 * 
 	 * @throws PersistenceException
 	 */
-	public static void updateStockValue(int prod_id, double qty) throws PersistenceException {
+	public static void updateStockValue(int prod_id, int qty) throws PersistenceException {
 		try (PreparedStatement statement = DataSource.INSTANCE.prepare(UPDATE_STOCK_SQL)){
 			// set statement arguments
-			statement.setDouble(1, qty);
+			statement.setInt(1, qty);
 			statement.setInt(2, prod_id);
 			// execute SQL
 			statement.executeUpdate();

@@ -10,7 +10,7 @@ import dataaccess.PersistenceException;
 public class ResetTables {
 
 	public void resetADSDerbyDB() throws FileNotFoundException, IOException, SQLException, PersistenceException {
-		DataSource.INSTANCE.connect("jdbc:derby:data/derby/adsdb;create=false", "SaleSys", "");
+		DataSource.INSTANCE.connect("jdbc:derby:data/derby/adsdb;create=false", "RentalSys", "");
 		RunSQLScript.runScript(DataSource.INSTANCE.getConnection(), "data/scripts/resetTables-Derby.sql");
 		DataSource.INSTANCE.close();		
 	}
