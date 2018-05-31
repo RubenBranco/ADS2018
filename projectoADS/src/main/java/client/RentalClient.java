@@ -2,7 +2,9 @@ package client;
 
 import business.ApplicationException;
 import business.CatalogRental;
+import business.Rental;
 import business.RentalSys;
+import use_cases.HandlerProcessRental;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -16,7 +18,7 @@ public class RentalClient {
      */
     public static void main(String[] args) {
 
-      /*  RentalSys app = new RentalSys();
+        RentalSys app = new RentalSys();
 
         try {
             app.start();
@@ -31,68 +33,46 @@ public class RentalClient {
         }
 
         // create catalog(s)
-        CatalogRental saleCatalog = new CatalogRental();
+        CatalogRental rentalCatalog = new CatalogRental();
 
         // this client deals with the Process Sale use case
-        HandlerProcessSale hps = new HandlerProcessSale(rentalCatalog);
+        HandlerProcessRental hpr = new HandlerProcessRental(rentalCatalog);
 
-        // and with the filter sales use case
-        HandlerFilterSales hfs = new HandlerFilterSales(rentalCatalog);
 
         try { // sample interaction
 
 
+            System.out.println("\n-- Add rental and print it ----------------------------");
 
-            System.out.println("\n-- Add sale and print it ----------------------------");
-
-            // creates a new sale (returns it)
-            Sale sale = hps.newSale();
+            // creates a new rental (returns it)
+            Rental rental = hpr.newRental();
 
             // adds two products to the database
-            hps.addProductToSale(sale, 101, 10);
-            hps.addProductToSale(sale, 102, 25);
+            hpr.addProductToRental(rental, 101, 10);
+            hpr.addProductToRental(rental, 102, 25);
 
-            // close sale
-            hps.closeSale(sale);
-
-            //////////////////
-
-            sale = saleCatalog.getSale(sale.getId());
-            System.out.println(sale);
+            // close rental
+            hpr.closeRental(rental);
 
             //////////////////
 
-            System.out.println("\n-- Get all sales with a total higher than 4000 ------");
-
-            List<Sale> list = hfs.filterSales(aSale -> aSale.total() > 4000);
-            for(Sale aSale : list)
-                System.out.println(aSale);
+            rental = rentalCatalog.getRental(rental.getId());
+            System.out.println(rental);
 
             //////////////////
 
-            System.out.println("\n-- Get all sales with more than 2 products ----------");
 
-            list = hfs.filterSales(aSale -> {
-                int length = aSale.getSaleProducts().size();
-                return length > 2;
-            });
-            for(Sale aSale : list)
-                System.out.println(aSale);
+            System.out.println("\n-- Print all rentals ----------------------------------");
+
+            System.out.println(rentalCatalog);
 
             //////////////////
 
-            System.out.println("\n-- Print all sales ----------------------------------");
-
-            System.out.println(saleCatalog);
-
-            //////////////////
-
-            hps.deleteSale(sale);
+            hpr.deleteRental(rental);
 
             System.out.println("\n-- Print all sales after delete ---------------------");
 
-            System.out.println(saleCatalog);
-
+            System.out.println(rentalCatalog);
 
 
         } catch (ApplicationException e) {
@@ -104,6 +84,6 @@ public class RentalClient {
             e.printStackTrace();
         }
 
-        app.stop();*/
+        app.stop();
     }
 }
