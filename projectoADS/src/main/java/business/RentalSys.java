@@ -3,8 +3,18 @@ package business;
 import dataaccess.DataSource;
 import dataaccess.PersistenceException;
 
+/**
+ * Includes operations regarding Rentals
+ *
+ * @author ADS08
+ */
 public class RentalSys {
 
+    /**
+     * Starts a connection with the database
+     *
+     * @throws ApplicationException
+     */
     public void start() throws ApplicationException {
         // Connects to the database
         try {
@@ -14,7 +24,10 @@ public class RentalSys {
         }
     }
 
-    public void stop()  {
+    /**
+     * Closes the database connection
+     */
+    public void stop() {
         // Closes the database connection
         DataSource.INSTANCE.close();
     }

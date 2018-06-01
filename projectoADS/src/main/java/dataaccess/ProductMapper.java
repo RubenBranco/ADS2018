@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import business.ProductSpec;
 
 /**
- * Conferir SaleMapper para mais informacao
+ * Conferir RentalMapper para mais informacao
  * 
  * @author jpn
  */
@@ -94,7 +94,7 @@ public class ProductMapper {
 	 * @throws PersistenceException
 	 */
 	public static void updateStockValue(int prod_id, int qty) throws PersistenceException {
-		try (PreparedStatement statement = DataSource.INSTANCE.prepare(UPDATE_STOCK_SQL)){
+		try (PreparedStatement statement = DataSource.INSTANCE.prepare(UPDATE_STOCK_SQL)) {
 			// set statement arguments
 			statement.setInt(1, qty);
 			statement.setInt(2, prod_id);

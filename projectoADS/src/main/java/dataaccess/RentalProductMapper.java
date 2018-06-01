@@ -9,6 +9,11 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Includes operations regarding RentalProduct persistence
+ *
+ * @author ADS08
+ */
 public class RentalProductMapper {
 
     /////////////////////////////////////////////////////////////////////////

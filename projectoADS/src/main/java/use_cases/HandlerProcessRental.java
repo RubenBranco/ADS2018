@@ -4,7 +4,14 @@ import business.ApplicationException;
 import business.CatalogRental;
 import business.Rental;
 
-public class HandlerProcessRental {
+import java.util.Date;
+
+/**
+ * Includes operations regarding ProcessRental Use Case (UC1)
+ *
+ * @author ADS08
+ */
+public class  HandlerProcessRental {
 
     private CatalogRental rentalCatalog;
 
@@ -24,8 +31,8 @@ public class HandlerProcessRental {
      *
      * @throws ApplicationException In case the rental fails to be created
      */
-    public Rental newRental() throws ApplicationException {
-        return rentalCatalog.newRental();
+    public Rental newRental(Date returnDate) throws ApplicationException {
+        return rentalCatalog.newRental(returnDate);
     }
 
     /**
@@ -59,4 +66,5 @@ public class HandlerProcessRental {
     public void deleteRental(Rental rental) throws ApplicationException {
         rentalCatalog.deleteRental(rental);
     }
+
 }

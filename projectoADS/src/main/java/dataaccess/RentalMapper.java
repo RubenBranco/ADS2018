@@ -11,6 +11,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Includes operations regarding Rental Persistence
+ *
+ * @author ADS08
+ */
 public class RentalMapper {
 
     // the cache keeps all rentals that were accessed during the current runtime
@@ -24,19 +29,21 @@ public class RentalMapper {
     /////////////////////////////////////////////////////////////////////////
     // SQL statement: inserts a new rental
     private static final String INSERT_RENTAL_SQL =
-            "INSERT INTO rental (id, date, total, status) VALUES (DEFAULT, ?, ?, '" + Rental.OPEN + "')";
+            "INSERT INTO rental (id, date, return_date, total, status, return_status) VALUES (DEFAULT, ?, ?, ?, '" + Rental.OPEN + "'," + Rental.WAITING + ")";
 
     /**
      * Inserts a new rental into the database
+     *
      * @param date The rental's date
      * @return the rental's id
      */
-    public static int insert(java.util.Date date) throws PersistenceException {
+    public static int insert(java.util.Date date, java.util.Date returnDate) throws PersistenceException {
         try (PreparedStatement statement =       // get new id
                      DataSource.INSTANCE.prepareGetGenKey(INSERT_RENTAL_SQL)) {
             // set statement arguments
             statement.setDate(1, new java.sql.Date(date.getTime()));
-            statement.setDouble(2, 0.0); // total
+            statement.setDate(2, new java.sql.Date(returnDate.getTime()));
+            statement.setDouble(3, 0.0); // total
             // execute SQL
             statement.executeUpdate();
             // get sale Id generated automatically by the database engine
@@ -45,7 +52,7 @@ public class RentalMapper {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            throw new PersistenceException ("Error inserting a new rental!", e);
+            throw new PersistenceException("Error inserting a new rental!", e);
         }
     }
 
@@ -58,8 +65,8 @@ public class RentalMapper {
      * Updates the rental's data in the database
      *
      * @param rental_id The rental id to update
-     * @param total the new rental total
-     * @param status is the rental open or closed?
+     * @param total     the new rental total
+     * @param status    is the rental open or closed?
      * @throws PersistenceException If an error occurs during the operation
      */
     public static void update(int rental_id, double total, String status) throws PersistenceException {
@@ -69,7 +76,31 @@ public class RentalMapper {
             statement.setInt(3, rental_id);
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new PersistenceException ("Internal error!", e);
+            throw new PersistenceException("Internal error!", e);
+        }
+
+        cachedRentals.remove(rental_id);  // rental was changed, remove from cache
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    // SQL statement: updates return status from existing rental
+    private static final String UPDATE_RENTAL_STATUS_SQL =
+            "UPDATE rental SET return_status = ? WHERE id = ?";
+
+    /**
+     * Updates the rental's rental status in the database
+     *
+     * @param rental_id     The rental id to update
+     * @param rental_status the new rental status
+     * @throws PersistenceException
+     */
+    public static void updateRentalStatus(int rental_id, byte rental_status) throws PersistenceException {
+        try (PreparedStatement statement = DataSource.INSTANCE.prepare(UPDATE_RENTAL_STATUS_SQL)) {
+            statement.setByte(1, rental_status);
+            statement.setInt(2, rental_id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new PersistenceException("Internal Error!", e);
         }
 
         cachedRentals.remove(rental_id);  // rental was changed, remove from cache
@@ -95,7 +126,7 @@ public class RentalMapper {
             statement.setDouble(1, rental_id);
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new PersistenceException ("Internal error!", e);
+            throw new PersistenceException("Internal error!", e);
         }
 
         cachedRentals.remove(rental_id);  // rental was deleted, remove from cache
@@ -104,7 +135,7 @@ public class RentalMapper {
     /////////////////////////////////////////////////////////////////////////
     // SQL statement: selects a rental by its id
     private static final String GET_RENTAL_SQL =
-            "SELECT id, date, total, status FROM rental WHERE id = ?";
+            "SELECT id, date, return_date, total, status, return_status FROM rental WHERE id = ?";
 
     /**
      * Gets a rental by its id
@@ -139,6 +170,7 @@ public class RentalMapper {
 
     /**
      * Retrieve all rentals kept on database
+     *
      * @return A list with all the rentals
      * @throws PersistenceException
      */
@@ -148,7 +180,7 @@ public class RentalMapper {
             try (ResultSet rs = statement.executeQuery()) {
 
                 List<Rental> rentals = new LinkedList<Rental>();
-                while(rs.next()) { // for each rental
+                while (rs.next()) { // for each rental
                     int rental_id = rs.getInt("id");          // get id of current rental
                     if (cachedRentals.containsKey(rental_id))   // check if it is cached
                         rentals.add(cachedRentals.get(rental_id));
@@ -168,25 +200,28 @@ public class RentalMapper {
     /**
      * Creates a rental object from a result set retrieved from the database.
      *
-     * @requires rs.next() was already executed
      * @param rs The result set with the information to create the rental.
      * @return A new rental loaded from the database.
      * @throws PersistenceException
+     * @requires rs.next() was already executed
      */
     private static Rental loadRental(ResultSet rs) throws PersistenceException {
         Rental rental;
         try {
-            rental = new Rental(rs.getInt("id"), rs.getDate("date"));
+            rental = new Rental(rs.getInt("id"), rs.getDate("date"), rs.getDate("return_date"));
 
             List<RentalProduct> rentalProducts = RentalProductMapper.getRentalProducts(rs.getInt("id"));
-            for(RentalProduct rp : rentalProducts)
+            for (RentalProduct rp : rentalProducts)
                 rental.addProductToRental(rp.getProduct(), (int) rp.getQty());
 
             if (rs.getString("status").equals(Rental.CLOSED))
                 rental.close();
 
+            if (rs.getByte("return_status") == Rental.RETURNED) {
+                rental.returnItems();
+            }
         } catch (SQLException e) {
-            throw new RecordNotFoundException ("Rental does not exist	", e);
+            throw new RecordNotFoundException("Rental does not exist	", e);
         }
         return rental;
     }

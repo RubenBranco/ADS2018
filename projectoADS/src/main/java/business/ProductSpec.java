@@ -1,5 +1,10 @@
 package business;
 
+/**
+ * Includes operations regarding Product Specifications
+ *
+ * @author jpn, ADS08
+ */
 public class ProductSpec {
 
 	private int    id;          // the database's id
@@ -24,7 +29,12 @@ public class ProductSpec {
 		this.price       = price;
 		this.qty         = qty;
 	}
-	
+
+	/**
+	 * Gets the productspec id
+     *
+	 * @return int id
+	 */
 	public int getId() {
 		return id;
 	}
@@ -66,7 +76,11 @@ public class ProductSpec {
 	public void setStock(int qty) {
 		this.qty = qty;
 	}
-	
+
+    /**
+     *
+     * @return String representation of product spec
+     */
 	public String toString() {
 		return description + " [code " + itemID + " with unit price €" + price + " and stock " + qty + "]";
 	}

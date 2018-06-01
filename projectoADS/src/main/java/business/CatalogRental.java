@@ -4,24 +4,24 @@ import java.util.Date;
 import java.util.List;
 
 import dataaccess.*;
+import javafx.application.Application;
 
 /**
- * Includes operations regarding Sales
+ * Includes operations regarding Rentals
  *
- * @author ADS08
- *
+ * @author jpn, ADS08
  */
-
 public class CatalogRental {
     /**
      * Creates a new rental, initially it open, and has a total of zero
+     *
      * @return
      * @throws ApplicationException
      */
-    public Rental newRental() throws ApplicationException {
+    public Rental newRental(Date returnDate) throws ApplicationException {
 
         try {
-            int rental_id = RentalMapper.insert(new Date());  // create new entry in the database
+            int rental_id = RentalMapper.insert(new Date(), returnDate);  // create new entry in the database
             return RentalMapper.getRentalById(rental_id);
         } catch (PersistenceException e) {
             throw new ApplicationException("Unable to create new rental", e);
@@ -31,7 +31,7 @@ public class CatalogRental {
     /**
      * Add a product to an open rental
      *
-     * @param rental    The current rental (must be open)
+     * @param rental  The current rental (must be open)
      * @param prod_id The product id to add (must exist)
      * @param qty     The quantity sold (must not be higher than the current stock)
      * @throws ApplicationException If some of these assumptions does not hold
@@ -42,8 +42,12 @@ public class CatalogRental {
         if (!rental.isOpen())    // check if it's open
             throw new ApplicationException("Rental " + rental.getId() + " is already closed!");
 
-        if (qty<0)
+        if (qty < 0)
             throw new ApplicationException("Negative amount (" + qty + " units of product " + prod_id + ") for rental" + rental.getId());
+
+        if (qty > 1) {
+            throw new ApplicationException("Cannot rent more than one item of the same itemID at the same time");
+        }
 
         ProductSpec product;
 
@@ -70,6 +74,25 @@ public class CatalogRental {
         } catch (PersistenceException e) {
             throw new ApplicationException("Unable to add " + product.getProductCode() +
                     " to sale id " + rental.getId(), e);
+        }
+    }
+
+    /**
+     * Return a product from a rental
+     *
+     * @param prod_id The product id to update
+     * @param qty     quantity of the product
+     * @throws ApplicationException
+     */
+    public void returnProductFromRental(int prod_id, int qty) throws ApplicationException {
+        ProductSpec product;
+
+        try {
+            product = ProductMapper.getProductByProdCod(prod_id);
+            product.setStock(product.getStock() + qty);
+            ProductMapper.updateStockValue(product.getId(), product.getStock());
+        } catch (PersistenceException e) {
+            throw new ApplicationException("Product " + prod_id + " does not exist!", e);
         }
     }
 
@@ -107,6 +130,13 @@ public class CatalogRental {
         }
     }
 
+    /**
+     * Gets an existing rental
+     *
+     * @param rental_id id from the existing rental
+     * @return A rental object
+     * @throws ApplicationException
+     */
     public Rental getRental(int rental_id) throws ApplicationException {
         try {
             return RentalMapper.getRentalById(rental_id);
@@ -115,6 +145,27 @@ public class CatalogRental {
         }
     }
 
+    /**
+     * Setting an existing rental as returned, as in, its items have been returned
+     *
+     * @param rental is a rental object
+     * @throws ApplicationException
+     */
+    public void setRentalAsReturned(Rental rental) throws ApplicationException {
+        try {
+            Byte rentalStatus = 1;
+            RentalMapper.updateRentalStatus(rental.getId(), rentalStatus);
+        } catch (PersistenceException e) {
+            throw new ApplicationException("Unable to update rental " + rental.getId(), e);
+        }
+    }
+
+    /**
+     * Gets all existing rentals.
+     *
+     * @return a list of rentals.
+     * @throws ApplicationException
+     */
     public List<Rental> getAllRentals() throws ApplicationException {
         try {
             return RentalMapper.getAllRentals();
@@ -124,14 +175,14 @@ public class CatalogRental {
     }
 
     /**
-     * String representation of all sales (attention: might produce a quite large output)
+     * String representation of all rentals (attention: might produce a quite large output)
      */
     public String toString() {
         try {
             List<Rental> rentals = RentalMapper.getAllRentals();
             StringBuffer sb = new StringBuffer();
 
-            for(Rental rental : rentals) {
+            for (Rental rental : rentals) {
                 sb.append(rental);
                 sb.append("\n");
             }
