@@ -3,11 +3,8 @@ package business;
 import static org.junit.Assert.*;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Random;
 
 import dataaccess.PersistenceException;
-import javafx.application.Application;
 import org.junit.AfterClass;  // cf. API at http://junit.org/junit4/javadoc/latest/
 import org.junit.Before;
 import org.junit.BeforeClass;
